@@ -1,6 +1,8 @@
 # wordwisecreator
 Generate Kindle Wordwise for All type of Ebook (EPUB, MOBI, PRC, AZW3, PDF...)
 
+You need to have [calibre](https://calibre-ebook.com/) on your device.
+
 ```
 usage: php wordwisecreator.php input_file hint_level
 input_file : path to file need to generate wordwise
