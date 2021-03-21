@@ -58,6 +58,10 @@ echo "[+] Convert Book to HTML \n";
 shell_exec('ebook-convert "'.$bookfile.'" .\book_dump.htmlz');
 shell_exec('ebook-convert .\book_dump.htmlz .\book_dump_html');
 
+if(!file_exists('book_dump_html/index1.html')){
+	die('Please check did you installed Calibre ? Can you run command ebook-convert in shell ? I cannot access command ebook-convert in your system shell, This script need Calibre to process ebook texts');
+}
+
 //Get content
 echo "[+] Load Book Contents \n";
 $bookcontent = file_get_contents('book_dump_html/index1.html');
