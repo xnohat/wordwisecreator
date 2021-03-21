@@ -18,6 +18,8 @@ if(!isset($argv[1])){
 	
 }
 
+echo "[+] Hint level: $hint_level \n";
+
 //Load Stop Words
 echo "[+] Load Stop Words \n";
 $stopwords = file('stopwords.txt', FILE_IGNORE_NEW_LINES);
