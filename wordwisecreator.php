@@ -29,24 +29,26 @@ function main($argv) {
 	echo "[+] Clean old temps \n";
 	cleanTempData();
 
+	$ebook_convert_cmd = getEbookConvertCmd();
+
 	// Convert book to html
-	convertBookToHtml($bookfile);
+	convertBookToHtml($ebook_convert_cmd, $bookfile);
 
 	// Process book content
 	$bookcontent_arr = processBookContent($wordwise_dict, $stopwords, $hint_level);
 
 	// Create book with wordwise
-	createBookWithWordwised($bookfile, $bookcontent_arr);
+	createBookWithWordwised($ebook_convert_cmd, $bookfile, $bookcontent_arr);
 
 	// Clean tempt data, who does need it
 	cleanTempData();
 }
 
-function convertBookToHtml($bookfile) {
+function convertBookToHtml($ebook_convert_cmd, $bookfile) {
 	echo "[+] Convert Book to HTML \n";
-	//shell_exec('ebook-convert everybodylies.mobi book_dump_html');
-	shell_exec('ebook-convert "'.$bookfile.'" book_dump.htmlz');
-	shell_exec("ebook-convert book_dump.htmlz book_dump_html");
+	//shell_exec(''.$ebook_convert_cmd.' everybodylies.mobi book_dump_html');
+	shell_exec(''.$ebook_convert_cmd.' "'.$bookfile.'" book_dump.htmlz');
+	shell_exec(''.$ebook_convert_cmd.' book_dump.htmlz book_dump_html');
 
 	if (!file_exists("book_dump_html/index1.html")) {
 	    die("Please check did you installed Calibre ? Can you run command ebook-convert in shell ? I cannot access command ebook-convert in your system shell, This script need Calibre to process ebook texts");
@@ -113,7 +115,7 @@ function processBookContent($wordwise_dict, $stopwords, $hint_level) {
 	return $bookcontent_arr;
 }
 
-function createBookWithWordwised($bookfile, $bookcontent_arr) {
+function createBookWithWordwised($ebook_convert_cmd, $bookfile, $bookcontent_arr) {
     $bookpath = pathinfo($bookfile, PATHINFO_DIRNAME);
     $bookfilename = pathinfo($bookfile, PATHINFO_FILENAME);
 
@@ -123,12 +125,12 @@ function createBookWithWordwised($bookfile, $bookcontent_arr) {
         "book_dump_html/index1.html",
         $new_bookcontent_with_wordwised
     );
-    shell_exec('ebook-convert book_dump_html/index1.html "'.$bookpath."/".$bookfilename.'-wordwised.epub" -m book_dump_html/content.opf');
-    // shell_exec('ebook-convert .\book_dump_html\index1.html "'.$bookpath.'/'.$bookfilename.'-wordwised.azw3"');
-    // shell_exec('ebook-convert .\book_dump_html\index1.html "'.$bookpath.'/'.$bookfilename.'-wordwised.pdf"');
+    shell_exec(''.$ebook_convert_cmd.' book_dump_html/index1.html "'.$bookpath.'/'.$bookfilename.'-wordwised.epub" -m book_dump_html/content.opf');
+    // shell_exec(''.$ebook_convert_cmd.' .\book_dump_html\index1.html "'.$bookpath.'/'.$bookfilename.'-wordwised.azw3"');
+    // shell_exec(''.$ebook_convert_cmd.' .\book_dump_html\index1.html "'.$bookpath.'/'.$bookfilename.'-wordwised.pdf"');
 
     // echo "[+] 3 book EPUB, AZW3, PDF with wordwise generated Done !\n";
-    echo "[+] The EPUB book with wordwise generated Done !\n";
+    echo "[+] The EPUB book with wordwise generated at \"".$bookpath."/".$bookfilename."-wordwised.epub\" \n";
 }
 
 function loadWordwisedDict() {
@@ -146,6 +148,23 @@ function loadWordwisedDict() {
 	    $data[] = $row;
 	}
 	return $data;
+}
+
+function getEbookConvertCmd() {
+	$cmd_name = 'ebook-convert';
+	if (!isCmdToolExists($cmd_name)) {
+		// try mac version
+		$mac_cmd = '/Applications/calibre.app/Contents/MacOS/ebook-convert';
+		if (isCmdToolExists($mac_cmd)) {
+			$cmd_name = $mac_cmd;
+		}
+	}
+	return $cmd_name;
+}
+
+function isCmdToolExists($tool_name) {
+	$res = shell_exec("command -v ".$tool_name."");
+	return !($res === null || trim($res) === '');
 }
 
 function cleanTempData() {
